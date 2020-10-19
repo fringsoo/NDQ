@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	
+     "settings": {
+	 	"sync-rsync.sites": [
+	 		{
+	 			"localPath": "/mnt/c/Users/Yp/OneDrive/ongoing/gametheorysemantic/NDQ/",
+				"remotePath": "ubuntu@ec2-54-183-2-2.us-west-1.compute.amazonaws.com:/home/ubuntu/NDQ/",
+	 		}
+	 	],
+	 	//"sync-rsync.executableShell": "C:\\Windows\\System32\\bash.exe",
+		"sync-rsync.executableShell": "/bin/bash",
+		"sync-rsync.shell": "ssh -i /home/fringsoo/.ssh/test_west_1.pem",
+		"sync-rsync.exclude":["3rdparty/"],
+	 	"terminal.integrated.shell.windows": "C:\\\\WINDOWS\\\\System32\\\\wsl.exe"
+	 }
+}
+

@@ -1,3 +1,67 @@
+# Pragmatics for SCII based on NDQ
+
+
+## Note
+ This codebase accompanies paper "Incorporating Pragmatic Reasoning Communication into Emergent Language", 
+ and is based on [NDQ](https://github.com/TonghanWang/NDQ),  [PyMARL](https://github.com/oxwhirl/pymarl) and [SMAC](https://github.com/oxwhirl/smac) codebases which are open-sourced.
+
+Tested Environment: AWS g4dn.xlarge GPU (NVIDIA T4 Tensor Core GPU) instance Ubuntu 16.04 (with CUDA cuDNN, NVIDIA-Docker) 
+
+To install necessary dependencies, build the Dockerfile using 
+```shell
+cd docker
+bash build.sh
+```
+
+Set up StarCraft II and SMAC:
+```shell
+bash install_sc2.sh
+```
+This will download SC2 into the 3rdparty folder and copy the required maps.
+
+Config in sc2.yaml to use the default map.
+```shell
+map_name: "1o_2r_vs_4r" 
+```
+
+
+For long-term training:
+
+Config in defaulty.yaml
+```shell
+evaluate: "False" 
+```
+Config in categorical_qmix.yaml, to use the pretrained model. 
+Or comment out this item to train from scratch.
+```shell
+checkpoint_path: "results/models/cate_qmix_smac_parallel__2020-05-26_16-14-23__1o_2r_vs_4r/" 
+```
+
+For short-term basseline and pragmatics testing:
+Config in defaulty.yaml
+```shell
+evaluate: "True" 
+```
+Config "checkpoint_path" to your model path.
+
+Run:
+```shell
+bash run_interactive.sh $GPU python3 src/main.py --config=categorical_qmix --env-config=sc2
+```
+
+The testing result metrics (took about 10-20 minutes to run):
+| drop rate  | baseline |pragmatics| 
+| ---------- | -------- |----------|
+| 0%  |  80.3% | 79.8% |
+| 30% |  77.8% | 79.7% |
+| 60% |  67.5% | 70.9% |
+| 80% |  56.3% | 63.1% |
+| 90% |  49.1% | 56.6% |
+| 95% |  48.4% | 53.1% |
+| 98% |  47.2% | 50.0% |
+| 100%|  40.6% | 50.6% |
+
+<!-- 
 # NDQ: Learning Nearly Decomposable Value Functions with Communication Minimization
 
 ## Note
@@ -84,4 +148,4 @@ The saved replays can be watched by double-clicking on them or using the followi
 python -m pysc2.bin.play --norender --rgb_minimap_size 0 --replay NAME.SC2Replay
 ```
 
-**Note:** Replays cannot be watched using the Linux version of StarCraft II. Please use either the Mac or Windows version of the StarCraft II client.
+**Note:** Replays cannot be watched using the Linux version of StarCraft II. Please use either the Mac or Windows version of the StarCraft II client. -->

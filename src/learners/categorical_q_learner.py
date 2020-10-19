@@ -25,7 +25,7 @@ class CateQLearner:
 				self.mixer = QMixer(args)
 			else:
 				raise ValueError("Mixer {} not recognised.".format(args.mixer))
-			self.params += list(self.mixer.parameters())
+			self.params += list(self.mixer.parameters()) ###???
 			self.target_mixer = copy.deepcopy(self.mixer)
 
 		self.optimiser = RMSprop(params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
@@ -71,14 +71,23 @@ class CateQLearner:
 		logits_out = []
 		m_sample_out = []
 		g_out = []
+		#reconstruct_losses = []
 		self.mac.init_hidden(batch.batch_size)
 		for t in range(batch.max_seq_length):
 			if self.args.comm and self.args.use_IB:
-				agent_outs, (mu, sigma), logits, m_sample = self.mac.forward(batch, t=t)
-				mu_out.append(mu)
-				sigma_out.append(sigma)
-				logits_out.append(logits)
-				m_sample_out.append(m_sample)
+				# agent_outs, (mu, sigma), logits, m_sample = self.mac.forward(batch, t=t)
+				# mu_out.append(mu)
+				# sigma_out.append(sigma)
+				# logits_out.append(logits)
+				# m_sample_out.append(m_sample)
+				
+				#reconstruct_losses.append((info['reconstruct_loss']**2).sum())
+				agent_outs, info = self.mac.forward(batch, t=t)
+				mu_out.append(info['mu'])
+				sigma_out.append(info['sigma'])
+				logits_out.append(info['logits'])
+				m_sample_out.append(info['m_sample'])
+				
 			else:
 				agent_outs = self.mac.forward(batch, t=t)
 			mac_out.append(agent_outs)
@@ -100,8 +109,9 @@ class CateQLearner:
 		self.target_mac.init_hidden(batch.batch_size)
 		for t in range(batch.max_seq_length):
 			if self.args.comm and self.args.use_IB:
-				target_agent_outs, (target_mu, target_sigma), target_logits, target_m_sample = \
-					self.target_mac.forward(batch, t=t)
+				#target_agent_outs, (target_mu, target_sigma), target_logits, target_m_sample = \
+				#	self.target_mac.forward(batch, t=t)
+				target_agent_outs, target_info = self.target_mac.forward(batch, t=t)
 			else:
 				target_agent_outs = self.target_mac.forward(batch, t=t)
 			target_mac_out.append(target_agent_outs)
@@ -120,8 +130,10 @@ class CateQLearner:
 		# Max over target Q-Values
 		if self.args.double_q:
 			# Get actions that maximise live Q (for double q-learning)
-			mac_out[avail_actions == 0] = -9999999
-			cur_max_actions = mac_out[:, 1:].max(dim=3, keepdim=True)[1]
+			mac_out_detach = mac_out.clone().detach()
+			mac_out_detach[avail_actions == 0] = -9999999
+			cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1]
+
 			target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
 		else:
 			target_max_qvals = target_mac_out.max(dim=3)[0]
@@ -152,6 +164,8 @@ class CateQLearner:
 			comm_loss = th.Tensor([0.])
 			comm_beta = th.Tensor([0.])
 			comm_entropy_beta = th.Tensor([0.])
+			#rec_loss = sum(reconstruct_losses)
+			#loss += 0.01*rec_loss
 		else:
 			# ### Optimize message
 			# Message are controlled only by expressiveness and compactness loss.
@@ -206,6 +220,7 @@ class CateQLearner:
 			                     (chosen_action_qvals * mask).sum().item() / (mask_elems * self.args.n_agents), t_env)
 			self.logger.log_stat("target_mean", (targets * mask).sum().item() / (mask_elems * self.args.n_agents),
 			                     t_env)
+			#self.logger.log_stat("reconstruct_loss", rec_loss.item(), t_env)
 			self.log_stats_t = t_env
 
 	def _update_targets(self):

@@ -75,7 +75,7 @@ def run(_run, _config, _log):
 	os._exit(os.EX_OK)
 
 
-def evaluate_sequential(args, runner):
+def evaluate_sequential_old(args, runner):
 	if args.test_is_cut:
 		if args.test_is_cut_prob:
 			print('mu thres:', 0.)
@@ -100,6 +100,43 @@ def evaluate_sequential(args, runner):
 
 	runner.close_env()
 
+def evaluate_sequential(args, runner, logger):
+	import numpy as np
+	import scipy.stats as st
+	for sample in range(50):
+		n_test_runs = max(1, args.test_nepisode // runner.batch_size)
+		# for i in [0, 80., 90., 95., 98., 100.]:
+		# 	for _ in range(n_test_runs):
+		# 		runner.run(test_mode=True, thres=i)
+		# for i in [0, 80., 90., 95., 98., 100.]:
+		# 	for _ in range(n_test_runs):
+		# 		runner.run(test_mode=True, prag=True, thres=i)
+	
+		for i in [0, 0.30, 0.60, 0.80, 0.90, 0.95, 0.98, 1]:
+			for _ in range(n_test_runs):
+				runner.run(test_mode=True, prob=i)
+		for i in [0, 0.30, 0.60, 0.80, 0.90, 0.95, 0.98, 1]:
+			for _ in range(n_test_runs):
+				runner.run(test_mode=True, prag=True, prob=i)
+	
+	i = 1
+	for (k, v) in sorted(logger.stats.items()):
+		if k.endswith("battle_won_mean"):
+			samples = [x[1] for x in logger.stats[k]]
+			mean = np.mean(samples)
+			std = np.std(samples)
+			sem = st.sem(samples)
+			ci = sem * st.t.ppf((1 + 0.95) / 2., len(samples)-1)
+			
+			
+			log_str = "{:<25}{:>8}".format(k + "_mean:", "{:.4f}".format(mean))
+			log_str += "\n" if i % 2 == 0 else "\t"
+			i+=1
+			log_str += "{:<25}{:>8}".format(k + "_95ci:", "{:.4f}".format(ci))
+			i+=1
+			log_str += "\n" if i % 2 == 0 else "\t"
+			logger.console_logger.info(log_str)
+	runner.close_env()
 
 def run_sequential(args, logger):
 	# Init runner so we can get env info
@@ -190,7 +227,7 @@ def run_sequential(args, logger):
 			runner.t_env = timestep_to_load
 
 			if args.evaluate or args.save_replay:
-				evaluate_sequential(args, runner)
+				evaluate_sequential(args, runner, logger)
 				return
 
 	# start training
@@ -241,9 +278,12 @@ def run_sequential(args, logger):
 				for _ in range(n_test_runs):
 					runner.run(test_mode=True, thres=i * 20.)
 			'''
-			for i in [90., 95., 98.]:
-				for _ in range(n_test_runs):
-					runner.run(test_mode=True, thres=i)
+			# for i in [80., 90., 95., 98., 100.]:
+			# 	for _ in range(n_test_runs):
+			# 		runner.run(test_mode=True, thres=i)
+			# for i in [80., 90., 95., 98., 100.]:
+			# 	for _ in range(n_test_runs):
+			# 		runner.run(test_mode=True, prag=True, thres=i)
 
 		if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
 			model_save_time = runner.t_env

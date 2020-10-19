@@ -1,13 +1,13 @@
 #!/bin/bash
 # Install SC2 and add the custom maps
 
-if [ -z "$EXP_DIR" ]
-then
-    EXP_DIR=~
-fi
+# if [ -z "$EXP_DIR" ]
+# then
+#     EXP_DIR=~
+# fi
 
-echo "EXP_DIR: $EXP_DIR"
-cd $EXP_DIR/pymarl-v2.IB
+# echo "EXP_DIR: $EXP_DIR"
+# cd $EXP_DIR/pymarl-v2.IB
 
 mkdir 3rdparty
 cd 3rdparty
@@ -37,6 +37,8 @@ wget https://github.com/oxwhirl/smac/files/2760783/SMAC_Maps.zip
 unzip SMAC_Maps.zip
 mv SMAC_Maps $MAP_DIR
 rm -rf SMAC_Maps.zip
+
+cp src/smac_plus/sc2_maps/* $MAP_DIR/SMAC_Maps
 
 echo 'StarCraft II and SMAC are installed.'
 

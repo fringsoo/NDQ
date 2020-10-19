@@ -6,8 +6,10 @@ epsilon_start: 1.0
 epsilon_finish: 0.05
 epsilon_anneal_time: 50000
 
-runner: "parallel"
+runner: "parallel_x"
 batch_size_run: 8
+batch_size: 8 # Number of episodes to train on
+checkpoint_path: "results/models/cate_qmix_smac_parallel__2020-05-26_16-14-23__1o_2r_vs_4r/" #30M pretrain one comm_mind succint message sampled
 mac: "cate_broadcast_comm_mac_full"
 
 buffer_size: 5000
@@ -20,7 +22,7 @@ agent: "rnn" # Default rnn agent
 agent_output_type: "q"
 learner: "cate_q_learner"
 double_q: True
-mixer: "qmix"
+mixer: "qmix" ###???
 mixing_embed_dim: 32
 
 name: "cate_qmix_smac_parallel"
@@ -31,13 +33,13 @@ vmax: 10
 
 # Comm
 comm: True
-comm_embed_dim: 10
+comm_embed_dim: 3
 comm_method: "information_bottleneck_full"
-c_beta: 1.
-comm_beta: 0.001
-comm_entropy_beta: 1e-6
+c_beta: 0.1
+comm_beta: 0.01 # 0.01
+comm_entropy_beta: 0.
 gate_loss_beta: 0.00001
-only_downstream: False
+only_downstream: False ###???
 use_IB: True
 is_print: False
 
@@ -51,8 +53,8 @@ comm_entropy_beta_start_decay: 20000000
 comm_entropy_beta_target: 1e-4
 comm_entropy_beta_end_decay: 50000000
 
-is_cur_mu: False
-is_rank_cut_mu: False
+is_cur_mu: True
+is_rank_cut_mu: True
 cut_mu_thres: 1.
 cut_mu_rank_thres: 80.0
 

@@ -4,6 +4,10 @@ from __future__ import print_function
 
 from smac.env.multiagentenv import MultiAgentEnv
 from smac_plus.starcraft2.maps import get_map_params
+from smac_plus.starcraft2.maps import smac_maps
+names = ['1o_2r_vs_4r']
+for name in names:
+    globals()[name] = type(name, (smac_maps.SMACMap,), dict(filename=name))
 
 import atexit
 from operator import attrgetter
@@ -1114,13 +1118,13 @@ class StarCraft2Env(MultiAgentEnv):
 				else:
 					# overload
 					type_id = 1
-			elif self.map_type == "overload_roach":
-				if unit.unit_type == 1972:
-					# roach
-					type_id = 0
-				elif unit.unit_type == 1971:
-					# overload
-					type_id = 1
+			# elif self.map_type == "overload_roach":
+			# 	if unit.unit_type == 1972:
+			# 		# roach
+			# 		type_id = 0
+			# 	elif unit.unit_type == 1971:
+			# 		# overload
+			# 		type_id = 1
 			elif self.map_type == "overload_bane":
 				if unit.unit_type == 1971:
 					# overload

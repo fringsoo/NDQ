@@ -40,11 +40,17 @@ RUN git clone https://github.com/oxwhirl/sacred.git /install/sacred && cd /insta
 #### -------------------------------------------------------------------
 #### install pytorch
 #### -------------------------------------------------------------------
-RUN pip3 install torch
-RUN pip3 install torchvision snakeviz pytest probscale
+RUN pip3 install torch==1.4.0
+RUN pip3 install torchvision==0.5.0 snakeviz pytest probscale
 
 ## -- SMAC
 RUN pip3 install git+https://github.com/oxwhirl/smac.git
+RUN pip3 install git+https://github.com/IBM/pytorch-seq2seq.git
+RUN pip3 install pudb
+RUN pip3 install cloudpickle
+#RUN apt-get install python-setuptools -y
+RUN pip3 install readline
+ENV SHELL /bin/bash
 ENV SC2PATH /pymarl/3rdparty/StarCraftII
 
 WORKDIR /pymarl

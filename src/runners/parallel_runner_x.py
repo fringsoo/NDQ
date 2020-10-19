@@ -83,7 +83,7 @@ class ParallelRunner_x:
 		self.t = 0
 		self.env_steps_this_run = 0
 
-	def run(self, test_mode=False, thres=0., prob=0.):
+	def run(self, test_mode=False, prag=False, thres=0., prob=0.):
 		self.reset()
 
 		all_terminated = False
@@ -99,7 +99,7 @@ class ParallelRunner_x:
 			# Pass the entire batch of experiences up till now to the agents
 			# Receive the actions for each agent at this timestep in a batch for each un-terminated env
 			actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, bs=envs_not_terminated,
-			                                  test_mode=test_mode, thres=thres, prob=prob)
+			                                  test_mode=test_mode, prag=prag, thres=thres, prob=prob)
 			cpu_actions = actions.to("cpu").numpy()
 
 			# Update the actions taken
@@ -182,7 +182,7 @@ class ParallelRunner_x:
 
 		cur_stats = self.test_stats if test_mode else self.train_stats
 		cur_returns = self.test_returns if test_mode else self.train_returns
-		log_prefix = "test_%.1lf" % thres if test_mode else ""
+		log_prefix = "test_prag%s_thres%.1lf_prob%.2lf" % (str(prag),thres,prob) if test_mode else ""
 		infos = [cur_stats] + final_env_infos
 		cur_stats.update({k: sum(d.get(k, 0) for d in infos) for k in set.union(*[set(d) for d in infos])})
 		cur_stats["n_episodes"] = self.batch_size + cur_stats.get("n_episodes", 0)
@@ -191,8 +191,9 @@ class ParallelRunner_x:
 		cur_returns.extend(episode_returns)
 
 		n_test_runs = max(1, self.args.test_nepisode // self.batch_size) * self.batch_size
-		if test_mode and (len(self.test_returns) == n_test_runs):
-			self._log(cur_returns, cur_stats, log_prefix)
+		if test_mode:
+			if (len(self.test_returns) == n_test_runs):
+				self._log(cur_returns, cur_stats, log_prefix)
 		elif self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
 			self._log(cur_returns, cur_stats, log_prefix)
 			if hasattr(self.mac.action_selector, "epsilon"):
