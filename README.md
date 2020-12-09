@@ -2,8 +2,7 @@
 
 
 ## Note
- This codebase accompanies paper "Incorporating Pragmatic Reasoning Communication into Emergent Language", 
- and is based on [NDQ](https://github.com/TonghanWang/NDQ),  [PyMARL](https://github.com/oxwhirl/pymarl) and [SMAC](https://github.com/oxwhirl/smac) codebases which are open-sourced.
+ This is the codebase for the SCII case study of NeurIPS2020 spotlight paper [**Incorporating Pragmatic Reasoning Communication into Emergent Language**](https://fringsoo.github.io/pragmatic_in2_emergent_papersite/), authored by Yipeng Kang, [Tonghan Wang](https://tonghanwang.github.io/) and [Gerard de Melo](http://gerard.demelo.org/). It is based on [NDQ](https://github.com/TonghanWang/NDQ),  [PyMARL](https://github.com/oxwhirl/pymarl) and [SMAC](https://github.com/oxwhirl/smac), which are open-sourced.
 
 Tested Environment: AWS g4dn.xlarge GPU (NVIDIA T4 Tensor Core GPU) instance Ubuntu 16.04 (with CUDA cuDNN, NVIDIA-Docker) 
 
